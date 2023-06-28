@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  <div class="container">
+    <h1>大文件上传</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="uploadButton">切片上传</button>
+    <br>
+  </div>
+  <script>
+   //chunk就是一个切片，也就是小文件
+  //  解释
+  //  1. 通过file.slice方法将文件切片
+  //  2. 通过FormData将切片转换为二进制数据
+  //  3. 通过fetch方法将切片上传到服务器
+
+
+
+    async function uploadChunk(chunk) {
+      const formData = new FormData();
+      formData.append('file', chunk);
+
+      //这里的地址可以替换为你的后端地址
+      // const response = await fetch('https://file.io', {
+      //   method: 'POST',
+      //   body: formData
+      // });
+      // 上传成功后，返回的是一个json对象，里面包含了文件的信息
+      // const result = await response.json();
+      // return result;
+      console.log(formData);
+    }
+
+    // 
+    document.getElementById('uploadButton').addEventListener('click', async function() {
+      // 获取输入框
+      const fileInput = document.getElementById('fileInput');
+      // 获取文件
+      const file = fileInput.files[0];
+      // 设置每次切片为100KB
+      const chunkSize = 100 * 1024; // 100KB
+      // Math.ceil向上取整，这一步主要是计算切片总数
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      // 循环切片
+      for (let i = 0; i < totalChunks; i++) {
+        // 此处比如文件大小为300KB，切片大小为100KB，那么第一次上传的是0-100KB，第二次是100-200KB，第三次是200-300KB
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+        //上传一个切片
+        // 每次循环都会调用uploadChunk方法，uploadChunk方法会返回一个promise对象，所以这里使用await等待uploadChunk方法执行完毕 
+        const result = await uploadChunk(chunk);
+        
+      }
+    });
+  </script>
+</body>
+</html>
+
